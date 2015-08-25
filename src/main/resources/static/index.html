@@ -1,0 +1,97 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Your First App with DHTMLX</title>
+    <!-- dhtmlx.js contains all necessary dhtmlx library javascript code -->
+    <script src="codebase/dhtmlx.js" type="text/javascript"></script>
+    <script src="codebase/connector/connector.js" type="text/javascript"></script>
+    <!-- dhtmlx.css contains styles definitions for all use components -->
+    <link rel="STYLESHEET" type="text/css" href="codebase/dhtmlx.css">
+    <style>
+            /*these styles allow dhtmlxLayout to work in fullscreen mode in different browsers correctly*/
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0px;
+            overflow: hidden;
+            background-color:white;
+        }
+    </style>
+
+    <script type="text/javascript">
+        var layout,menu,toolbar,contactsGrid,contactForm;
+        dhtmlx.image_path = "codebase/imgs/";
+        dhtmlxEvent(window,"load",function(){                                          //provides the script as a handler of the 'onload' HTML event
+            layout = new dhtmlXLayoutObject(document.body,"2U");                       //initializes dhtmlxLayout
+            layout.cells("a").setText("Contacts");                                     //sets the text in the header of the 'grid' column
+            layout.cells("b").setText("Contact Details");                              //sets the text in the header of the 'form' column
+            layout.cells("b").setWidth(500);                                           //sets the width of the 'form' column
+
+            menu = layout.attachMenu();                                                //initializes dhtmlxMenu
+            menu.setIconsPath("icons/");                                               //sets the path to custom icons
+            menu.loadXML("data/menu.xml");                                             //loads items from the "data/menu.xml" file to the menu
+
+            toolbar = layout.attachToolbar();                                          //initializes dhtmlxToolbar
+            toolbar.setIconsPath("icons/");                                            //sets the path to custom images
+            toolbar.loadXML("data/toolbar.xml");                                       //loads items from the "data/toolbar.xml" file to the toolbar
+
+            contactsGrid = layout.cells("a").attachGrid();                             //initializes dhtmlxGrid
+            contactsGrid.setHeader("Name,Last Name,Email");                            //sets the header labels
+            contactsGrid.setColumnIds("fname,lname,email");                            //sets the column ids
+            //contactsGrid.setInitWidths("200,200,*");                                 //sets the initial widths of columns
+            contactsGrid.setColAlign("left,left,left");                                //sets the horizontal alignment
+            contactsGrid.setColTypes("ro,ro,ro");                                      //sets the types of columns
+            contactsGrid.setColSorting("str,str,str");                                 //sets the sorting types of columns
+            contactsGrid.attachHeader("#text_filter,#text_filter,#text_filter");       //sets the filters for columns
+            contactsGrid.init();                                                       //renders  dhtmlxGrid on the page
+            contactsGrid.load("data/contacts.php");                                    //loads data from the "data/contacts.php" file to the grid
+
+            contactForm = layout.cells("b").attachForm();                              //initializes dhtmlxForm
+            contactForm.loadStruct("data/form.xml");                                   //loads controls, specified in the "data/form.xml" file to the form
+            contactForm.bind(contactsGrid);                                            //binds the form to the grid
+
+            var dpg = new dataProcessor("data/contacts.php");                          //inits dataProcessor
+            dpg.init(contactsGrid);                                                    //associates the dataProcessor instance with the grid
+
+            dpg.attachEvent("onAfterUpdate", function(sid, action, tid, tag){
+                if (action == "inserted"){
+                    contactsGrid.selectRowById(tid);                                   //selects a row
+                    contactForm.setFocusOnFirstActive();                               //sets focus to the 1st form's input
+                }
+            })
+
+            contactForm.attachEvent("onButtonClick", function(id){                     //attaches a handler function to the "onButtonClick" event
+                contactForm.save();                                                    //sends the values of the updated row to the server
+            });
+
+            toolbar.attachEvent("onclick",function(id){                                //attaches a handler function to the "onclick" event
+                if(id=="newContact"){                                                  //'newContact' is the id of the button in the toolbar
+                    var rowId=contactsGrid.uid();                                      //generates an unique id
+                    var pos = contactsGrid.getRowsNum();                               //gets the number of rows in the grid
+                    contactsGrid.addRow(rowId,["New contact","",""],pos);              //adds a new row to the grid. The 'addRow()' method takes 3 parameters: the row id (must be unique), the initial values of the row, the  position where the new must be inserted
+                };
+                if(id=="delContact"){                                                  //'delContact' is the id of the button in the toolbar
+                    var rowId = contactsGrid.getSelectedRowId();                       //gets the id of the currently selected row
+                    var rowIndex = contactsGrid.getRowIndex(rowId);                    //gets the index of the row with the specified id
+
+                    if(rowId!=null){
+                        contactsGrid.deleteRow(rowId);                                 //deletes the currently selected row
+                        if(rowIndex!=(contactsGrid.getRowsNum()-1)){                   //checks whether  the currently selected row is NOT last in the grid
+                            contactsGrid.selectRow(rowIndex+1,true);                   //if the currently selected row isn't last - moves selection to the next row
+                        } else{                                                        //otherwise, moves selection to the previous row
+                            contactsGrid.selectRow(rowIndex-1,true)
+                        }
+                    }
+                }
+            });
+
+        })
+    </script>
+</head>
+
+<body>
+
+</body>
+</html>
+

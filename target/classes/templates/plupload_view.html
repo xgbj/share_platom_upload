@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+
+<link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.9/themes/base/jquery-ui.css" type="text/css" />
+<link rel="stylesheet" href="js/jquery.ui.plupload/css/jquery.ui.plupload.css" type="text/css" />
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.2/jquery-ui.min.js"></script>
+
+<!-- production -->
+<script type="text/javascript" src="js/plupload.full.min.js"></script>
+<script type="text/javascript" src="js/jquery.ui.plupload/jquery.ui.plupload.js"></script>
+
+</head>
+
+
+<body id="wjw" onload="load()" style="font: 13px Verdana; background: #eee; color: #333">
+
+
+
+
+
+<form id="form" method="post" action="/upload">
+	<div id="uploader">
+		<p>Your browser doesn't have Flash, Silverlight or HTML5 support.</p>
+	</div>
+	<br />
+	
+</form>
+
+<script th:inline="javascript">
+ /*<![CDATA[*/
+// Initialize the widget when the DOM is ready
+$(function() {
+	var shareid = /*[[${share_id}]]*/;
+	var uid = /*[[${u_id}]]*/;
+	var partid = /*[[${part_id}]]*/;
+	
+	$("#uploader").plupload({
+		// General settings
+		runtimes : 'html5,flash,silverlight,html4',
+		url : '/uploadchunks?share_id='+shareid+'&u_id='+uid+'&part_id='+partid,
+      	
+		// User can upload no more then 20 files in one go (sets multiple_queues to false)
+		max_file_count: 20,
+				
+		chunk_size: '100mb',
+
+		// Resize images on clientside if we can
+		resize : {
+			width : 200, 
+			height : 200, 
+			quality : 90,
+			crop: true // crop to exact dimensions
+		},
+		
+		filters : {
+			// Maximum file size
+			max_file_size : '10000mb',//10G
+			// Specify what files to browse for
+			mime_types : [//只允许上传视频....
+			      {title : "Video files", extensions : "rmvb,mp4,mpg,avi,flv,asx,asf,wmv,3gp"}        
+			              ],
+		    prevent_duplicates : true // 不允许选取重复文件 
+		},
+
+		// Rename files by clicking on their titles
+		rename: true,
+		
+		// Sort files
+		sortable: true,
+
+		// Enable ability to drag'n'drop files onto the widget (currently only HTML5 supports that)
+		dragdrop: true,
+
+		// Views to activate
+		views: {
+			list: true,
+			thumbs: true, // Show thumbs
+			active: 'thumbs'
+		},
+
+		// Flash settings
+		flash_swf_url : 'js/Moxie.swf',
+
+		// Silverlight settings
+		silverlight_xap_url : 'js/Moxie.xap',
+		
+		init : {
+			 FilesAdded: function(up, files) {
+				              
+				
+				// 新增部分 主要用来处理  断点续传
+		        
+		        //新建数据结构  data 传递数据有  文件名  文件大小  文件分片大小 最大分片数
+				var  DATA={  
+			               fileName:files[0].name,  
+			               chunk_size:up.settings.chunk_size,  
+			               chunks:Math.ceil(files[0].size/up.settings.chunk_size), 
+			               file_size:files[0].size,
+			               lastModified : files[0].lastModifiedDate,
+			               share_id : shareid,
+			               u_id : uid
+			           };  
+		        
+				 console.log(DATA.fileName,DATA.chunk_size,DATA.chunks);
+		        
+			     
+			     htmlobj=$.ajax({url:"/checkplupload",data:DATA,async:true});
+			     
+			     setTimeout(function(){
+			    	 
+			    	 var obj = htmlobj.responseText;
+			    	 
+			    	 console.log(files[0].loaded,htmlobj,obj);
+				     
+				     files[0].loaded  =  obj;
+				     
+				     console.log(files[0].loaded);
+			    	 
+			     },100);
+			     
+			     
+			     
+			     
+			     
+			     self.trigger('selected', null, { up: up, files: files } );  
+			  
+			    // re-enable sortable  
+			    if (self.options.sortable && $.ui.sortable) {  
+			        self._enableSortingList();    
+			    }  
+			  
+			    self.trigger('updatelist', null, { filelist: self.filelist });  
+			      
+			    if (self.options.autostart) {  
+			        // set a little delay to make sure that QueueChanged triggered by the core has time to complete  
+			        setTimeout(function() {  
+			            self.start();  
+			        }, 10);  
+			    }  
+						  
+		      },
+		   
+		    BeforeUpload: function(up, file) {
+					// Called right before the upload for a given file starts, can be used to cancel it if required
+					
+				
+				},  
+		      
+		    FileUploaded : function(uploader,file,responseObject){
+		    	
+		    	alert("Upload successed!");
+		    	window.location.href = document.referrer;
+		    	
+		    },
+		    UploadComplete : function(uploader,files){
+		    	
+		    	
+		    	
+		    }
+		   
+		}
+		
+		
+		
+		
+	});
+
+    console.log("hello wjw");
+	
+	
+	
+	// Handle the case when form was submitted before uploading has finished
+	$('#form').submit(function(e) {
+		// Files in queue upload them first
+		if ($('#uploader').plupload('getFiles').length > 0) {
+
+			// When all files are uploaded submit form
+			$('#uploader').on('complete', function() {
+				$('#form')[0].submit();
+			});
+
+			$('#uploader').plupload('start');
+		} else {
+			alert("You must have at least one file in the queue.");
+		}
+		return false; // Keep the form from submitting
+	});
+});
+ 
+ 
+   //绑定返回按钮
+   //上传按钮
+	$('#finished').click(function(){
+		history.back();  
+	});
+ 
+/*]]>*/
+</script>
+
+</body>
+</html>

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Hello Spring Boot!</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link href="http://cdn.jsdelivr.net/webjars/bootstrap/3.2.0/css/bootstrap.min.css"
+          th:href="@{/webjars/bootstrap/3.2.0/css/bootstrap.min.css}"
+          rel="stylesheet" media="screen" />
+    <link href="../static/css/core.css"
+          th:href="@{/css/core.css}"
+          rel="stylesheet" media="screen" />
+    <script src="http://cdn.jsdelivr.net/webjars/jquery/2.1.1/jquery.min.js"
+            th:src="@{/webjars/jquery/2.1.1/jquery.min.js}"></script>
+          
+
+ <script src="/jquery/jquery-1.11.1.min.js"></script>
+<script type="text/javascript"> 
+$(document).ready(function(){
+$(".flip").click(function(){
+    $(".container").slideToggle("slow");
+  });
+$(".flip1").click(function(){
+    $(".userlist").slideToggle("slow");
+  });
+
+});
+</script>
+
+<style > 
+
+table.userlist
+{
+   display:none;
+}
+</style>
+
+
+</head>
+<body>
+
+
+ 
+<p class="flip">请点击这里</p>
+<a href="logout">logout</a>
+
+
+<div class="container">
+    
+        <h1>Test</h1>
+        <h3>登录成功</h3>
+       
+                                           姓名 ： 
+            <p th:text = "${ukey.user_name}">默认值 </p>
+            ID：
+            <p th:text = "${ukey.user_id}">默认id </p>
+       <br />
+              
+     <a href="watch">观看视频</a>
+     
+       
+     <form method="POST" enctype="multipart/form-data"  action="/upload">  
+      
+      File to upload: <input type="file" name="file"></input> <br /> 
+      Name: <input  type="text" name="name"></input> <br /> <br /> 
+      <input type="submit"  value="Upload"> Press here to upload the file!</input>  
+     
+     </form>  
+       
+     
+        
+        <p class="flip1">点击显示已注册用户列表</p>      
+              
+        <br />
+         <br />
+                      
+        <table class="userlist">    
+          <tr>
+            <th>NAME</th>
+            <th>ID</th>
+          </tr>  
+          <tr th:each="prod,iterStat : ${alluser}">
+             <td th:text="${prod.user_name}">www</td>
+             <td th:text="${prod.user_id}">www</td>
+          </tr>
+           
+        </table>    
+            
+    
+</div>
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Hello Spring Boot!</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link href="http://cdn.jsdelivr.net/webjars/bootstrap/3.2.0/css/bootstrap.min.css"
+          th:href="@{/webjars/bootstrap/3.2.0/css/bootstrap.min.css}"
+          rel="stylesheet" media="screen" />
+    <link href="../static/css/core.css"
+          th:href="@{/css/core.css}"
+          rel="stylesheet" media="screen" />
+    <script src="http://cdn.jsdelivr.net/webjars/jquery/2.1.1/jquery.min.js"
+            th:src="@{/webjars/jquery/2.1.1/jquery.min.js}"></script>
+    
+          
+
+ <script src="/jquery/jquery-1.11.1.min.js"></script>
+
+ <script type="text/javascript">
+ function btnck(){
+    var a=document.getElementById("ipt1");
+    var b=document.getElementById("ipt2");
+    if(a.value==""||b.value==""){
+        alert("用户名或密码不能为空！");
+        return false;}
+    else if(a.value.length >= 20 || b.value.length()>=20){
+    	alert("字符串长度不能超过20");
+        return false;
+    	
+    }
+    }
+</script>
+  <script type="text/javascript"> 
+$(document).ready(function(){
+$(".flip").click(function(){
+    $(".container").slideToggle("slow");
+  });
+});
+</script>
+</head>
+<body>
+
+
+ 
+<p class="flip">请点击这里</p>
+
+
+<div class="container">
+    
+     <h1>注册</h1>
+       <form action="inster" method="post">
+        <table>
+        
+         
+          <tr> 
+              <td>  name: </td>
+              <td> <input id="ipt1" type="text" name="name" /></td> <td>(长度为20位以下的字符)</td> 
+         </tr>
+         <tr>    
+              <td>id: </td>
+              <td> <input  id="ipt2" type="text" name="id" /></td> <td> <p>(长度为20位以下的字符)</p></td> 
+         </tr> 
+        </table>
+        <div th:switch="${state}"> 
+          <p th:case="0" style="color:red;font-size:16px;">name或id错误</p>
+          
+         </div>
+        
+         <input type="submit" value="Submit"  onclick="return btnck();" />
+      </form>  
+      
+</div>
+</body>
+</html>
